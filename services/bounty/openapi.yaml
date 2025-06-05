@@ -1,0 +1,202 @@
+openapi: 3.0.2
+info:
+  title: Bounty Service API
+  description: API for managing bug bounties and claims
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /bounties:
+    get:
+      summary: Retrieve a list of all bounties
+      responses:
+        '200':
+          description: List of bounties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bounty'
+  /bounties/{id}:
+    get:
+      summary: Retrieve a single bounty by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Single bounty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bounty'
+    patch:
+      summary: Update a single bounty by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BountyUpdate'
+      responses:
+        '200':
+          description: Updated bounty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bounty'
+  /bounties/{id}/claims:
+    get:
+      summary: Retrieve a list of claims for a single bounty by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of claims
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Claim'
+  /bounties/{id}/claims/{claimId}:
+    get:
+      summary: Retrieve a single claim by ID and bounty ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Single claim
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Claim'
+  /bounties/{id}/submit-fix:
+    post:
+      summary: Submit a fix for a single bounty by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FixSubmission'
+      responses:
+        '201':
+          description: Fix submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bounty'
+  /bounties/{id}/dispute:
+    post:
+      summary: Create a dispute for a single bounty by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dispute'
+      responses:
+        '201':
+          description: Dispute created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bounty'
+
+components:
+  schemas:
+    Bounty:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the bounty
+        title:
+          type: string
+          description: Title of the bounty
+        description:
+          type: string
+          description: Description of the bounty
+        points:
+          type: integer
+          description: Number of points for solving the bounty
+    BountyUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the bounty
+        title:
+          type: string
+          description: Title of the bounty
+        description:
+          type: string
+          description: Description of the bounty
+        points:
+          type: integer
+          description: Number of points for solving the bounty
+    Claim:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the claim
+        bountyId:
+          type: integer
+          description: Unique ID of the bounty related to this claim
+        userId:
+          type: integer
+          description: Unique ID of the user who made this claim
+    FixSubmission:
+      type: object
+      properties:
+        fix:
+          type: string
+          description: The actual fix submitted by the user
+        proof:
+          type: string
+          description: Proof of the fix, such as a screenshot or video
+    Dispute:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason for disputing the bounty
+
+  responses:
+    '400': {description: Bad request}
+    '401': {description: Unauthorized}
+    '403': {description: Forbidden}
