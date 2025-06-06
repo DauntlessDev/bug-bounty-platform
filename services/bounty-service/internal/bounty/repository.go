@@ -8,10 +8,17 @@ import (
 )
 
 type DBRepository struct {
-	q *db.Queries
+	q DBQuerier
 }
 
-func NewDBRepository(queries *db.Queries) Repository {
+type DBQuerier interface {
+	GetBounties(context.Context) ([]db.Bounty, error)
+	GetBountyByID(context.Context, uuid.UUID) (db.Bounty, error)
+	CreateBounty(context.Context, db.CreateBountyParams) error
+	UpdateBounty(context.Context, db.UpdateBountyParams) error
+}
+
+func NewDBRepository(queries DBQuerier) Repository {
 	return &DBRepository{q: queries}
 }
 
