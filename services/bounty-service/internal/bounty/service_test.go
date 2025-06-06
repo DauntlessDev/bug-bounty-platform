@@ -13,27 +13,27 @@ type MockRepository struct {
 	mock.Mock
 }
 
-func (m *MockRepository) GetBounties() ([]bounty.Bounty, error) {
-	args := m.Called()
+func (mockRepo *MockRepository) GetBounties() ([]bounty.Bounty, error) {
+	args := mockRepo.Called()
 	return args.Get(0).([]bounty.Bounty), args.Error(1)
 }
 
-func (m *MockRepository) GetBountyByID(id string) (bounty.Bounty, error) {
-	args := m.Called(id)
-	return args.Get(0).(bounty.Bounty), args.Error(1)
+func (mockRepo *MockRepository) GetBountyByID(bountyID string) (bounty.Bounty, error) {
+	arguments := mockRepo.Called(bountyID)
+	return arguments.Get(0).(bounty.Bounty), arguments.Error(1)
 }
 
-func (m *MockRepository) CreateBounty(b *bounty.Bounty) error {
-	args := m.Called(b)
-	return args.Error(0)
+func (mockRepo *MockRepository) CreateBounty(bountyItem *bounty.Bounty) error {
+	arguments := mockRepo.Called(bountyItem)
+	return arguments.Error(0)
 }
 
-func (m *MockRepository) UpdateBounty(b *bounty.Bounty) error {
-	args := m.Called(b)
-	return args.Error(0)
+func (mockRepo *MockRepository) UpdateBounty(bountyItem *bounty.Bounty) error {
+	arguments := mockRepo.Called(bountyItem)
+	return arguments.Error(0)
 }
 
-func TestService_GetBounties(t *testing.T) {
+func TestService_GetBounties(test *testing.T) {
 	mockRepo := new(MockRepository)
 	service := bounty.NewService(mockRepo)
 
@@ -46,12 +46,12 @@ func TestService_GetBounties(t *testing.T) {
 
 	bounties, err := service.GetBounties()
 
-	assert.NoError(t, err)
-	assert.Equal(t, expectedBounties, bounties)
-	mockRepo.AssertExpectations(t)
+	assert.NoError(test, err)
+	assert.Equal(test, expectedBounties, bounties)
+	mockRepo.AssertExpectations(test)
 }
 
-func TestService_GetBountiesBy(t *testing.T) {
+func TestService_GetBountiesBy(test *testing.T) {
 	mockRepo := new(MockRepository)
 	service := bounty.NewService(mockRepo)
 
@@ -62,12 +62,12 @@ func TestService_GetBountiesBy(t *testing.T) {
 
 	bounty, err := service.GetBountiesBy(bountyID)
 
-	assert.NoError(t, err)
-	assert.Equal(t, expectedBounty, bounty)
-	mockRepo.AssertExpectations(t)
+	assert.NoError(test, err)
+	assert.Equal(test, expectedBounty, bounty)
+	mockRepo.AssertExpectations(test)
 }
 
-func TestService_GetBountiesBy_NotFound(t *testing.T) {
+func TestService_GetBountiesBy_NotFound(test *testing.T) {
 	mockRepo := new(MockRepository)
 	service := bounty.NewService(mockRepo)
 
@@ -78,12 +78,12 @@ func TestService_GetBountiesBy_NotFound(t *testing.T) {
 
 	_, err := service.GetBountiesBy(bountyID)
 
-	assert.Error(t, err)
-	assert.Equal(t, expectedError, err)
-	mockRepo.AssertExpectations(t)
+	assert.Error(test, err)
+	assert.Equal(test, expectedError, err)
+	mockRepo.AssertExpectations(test)
 }
 
-func TestService_CreateBounty(t *testing.T) {
+func TestService_CreateBounty(test *testing.T) {
 	mockRepo := new(MockRepository)
 	service := bounty.NewService(mockRepo)
 
@@ -93,11 +93,11 @@ func TestService_CreateBounty(t *testing.T) {
 
 	err := service.CreateBounty(newBounty)
 
-	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
+	assert.NoError(test, err)
+	mockRepo.AssertExpectations(test)
 }
 
-func TestService_CreateBounty_Error(t *testing.T) {
+func TestService_CreateBounty_Error(test *testing.T) {
 	mockRepo := new(MockRepository)
 	service := bounty.NewService(mockRepo)
 
@@ -108,12 +108,12 @@ func TestService_CreateBounty_Error(t *testing.T) {
 
 	err := service.CreateBounty(newBounty)
 
-	assert.Error(t, err)
-	assert.Equal(t, expectedError, err)
-	mockRepo.AssertExpectations(t)
+	assert.Error(test, err)
+	assert.Equal(test, expectedError, err)
+	mockRepo.AssertExpectations(test)
 }
 
-func TestService_UpdateBounty(t *testing.T) {
+func TestService_UpdateBounty(test *testing.T) {
 	mockRepo := new(MockRepository)
 	service := bounty.NewService(mockRepo)
 
@@ -123,11 +123,11 @@ func TestService_UpdateBounty(t *testing.T) {
 
 	err := service.UpdateBounty(updatedBounty)
 
-	assert.NoError(t, err)
-	mockRepo.AssertExpectations(t)
+	assert.NoError(test, err)
+	mockRepo.AssertExpectations(test)
 }
 
-func TestService_UpdateBounty_Error(t *testing.T) {
+func TestService_UpdateBounty_Error(test *testing.T) {
 	mockRepo := new(MockRepository)
 	service := bounty.NewService(mockRepo)
 
@@ -138,7 +138,7 @@ func TestService_UpdateBounty_Error(t *testing.T) {
 
 	err := service.UpdateBounty(updatedBounty)
 
-	assert.Error(t, err)
-	assert.Equal(t, expectedError, err)
-	mockRepo.AssertExpectations(t)
+	assert.Error(test, err)
+	assert.Equal(test, expectedError, err)
+	mockRepo.AssertExpectations(test)
 }

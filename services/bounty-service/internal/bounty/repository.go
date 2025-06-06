@@ -22,43 +22,43 @@ func NewDBRepository(queries DBQuerier) Repository {
 	return &DBRepository{q: queries}
 }
 
-func (r *DBRepository) GetBounties() ([]Bounty, error) {
-	dbList, err := r.q.GetBounties(context.Background())
+func (repository *DBRepository) GetBounties() ([]Bounty, error) {
+	databaseBounties, err := repository.q.GetBounties(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]Bounty, len(dbList))
-	for i, dbItem := range dbList {
-		result[i] = toDomain(dbItem)
+	bounties := make([]Bounty, len(databaseBounties))
+	for i, dbItem := range databaseBounties {
+		bounties[i] = toDomain(dbItem)
 	}
-	return result, nil
+	return bounties, nil
 }
 
-func (r *DBRepository) GetBountyByID(id string) (Bounty, error) {
-	uuidID, err := uuid.Parse(id)
+func (repository *DBRepository) GetBountyByID(bountyID string) (Bounty, error) {
+	uuidID, err := uuid.Parse(bountyID)
 	if err != nil {
 		return Bounty{}, err
 	}
-	dbItem, err := r.q.GetBountyByID(context.Background(), uuidID)
+	databaseBounty, err := repository.q.GetBountyByID(context.Background(), uuidID)
 	if err != nil {
 		return Bounty{}, err
 	}
-	return toDomain(dbItem), nil
+	return toDomain(databaseBounty), nil
 }
 
-func (r *DBRepository) CreateBounty(b *Bounty) error {
-	params, err := toDBParams(*b)
+func (repository *DBRepository) CreateBounty(bounty *Bounty) error {
+	params, err := toDBParams(*bounty)
 	if err != nil {
 		return err
 	}
-	return r.q.CreateBounty(context.Background(), params)
+	return repository.q.CreateBounty(context.Background(), params)
 }
 
-func (r *DBRepository) UpdateBounty(b *Bounty) error {
-	params, err := ToDBUpdateParams(*b)
+func (repository *DBRepository) UpdateBounty(bounty *Bounty) error {
+	params, err := ToDBUpdateParams(*bounty)
 	if err != nil {
 		return err
 	}
-	return r.q.UpdateBounty(context.Background(), params)
+	return repository.q.UpdateBounty(context.Background(), params)
 }

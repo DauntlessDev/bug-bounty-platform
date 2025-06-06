@@ -7,50 +7,50 @@ import (
 	"github.com/google/uuid"
 )
 
-func toDomain(dbB db.Bounty) Bounty {
-	desc := ""
-	if dbB.Description.Valid {
-		desc = dbB.Description.String
+func toDomain(databaseBounty db.Bounty) Bounty {
+	description := ""
+	if databaseBounty.Description.Valid {
+		description = databaseBounty.Description.String
 	}
 
 	return Bounty{
-		ID:          dbB.ID.String(),
-		Title:       dbB.Title,
-		Description: desc,
-		Points:      int(dbB.Points),
+		ID:          databaseBounty.ID.String(),
+		Title:       databaseBounty.Title,
+		Description: description,
+		Points:      int(databaseBounty.Points),
 	}
 }
 
-func toDBParams(b Bounty) (db.CreateBountyParams, error) {
-	uuidID, err := uuid.Parse(b.ID)
+func toDBParams(bounty Bounty) (db.CreateBountyParams, error) {
+	uuidID, err := uuid.Parse(bounty.ID)
 	if err != nil {
 		return db.CreateBountyParams{}, err
 	}
 
 	return db.CreateBountyParams{
 		ID:    uuidID,
-		Title: b.Title,
+		Title: bounty.Title,
 		Description: sql.NullString{
-			String: b.Description,
-			Valid:  b.Description != "",
+			String: bounty.Description,
+			Valid:  bounty.Description != "",
 		},
-		Points: int32(b.Points),
+		Points: int32(bounty.Points),
 	}, nil
 }
 
-func ToDBUpdateParams(b Bounty) (db.UpdateBountyParams, error) {
-	uuidID, err := uuid.Parse(b.ID)
+func ToDBUpdateParams(bounty Bounty) (db.UpdateBountyParams, error) {
+	uuidID, err := uuid.Parse(bounty.ID)
 	if err != nil {
 		return db.UpdateBountyParams{}, err
 	}
 
 	return db.UpdateBountyParams{
 		ID:    uuidID,
-		Title: b.Title,
+		Title: bounty.Title,
 		Description: sql.NullString{
-			String: b.Description,
-			Valid:  b.Description != "",
+			String: bounty.Description,
+			Valid:  bounty.Description != "",
 		},
-		Points: int32(b.Points),
+		Points: int32(bounty.Points),
 	}, nil
 }

@@ -18,79 +18,79 @@ func NewHandler(service *Service, middlewares ...Middleware) *Handler {
 	return &Handler{service: service, middlewares: middlewares}
 }
 
-func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
-	mux.Handle("GET /bounties", h.applyMiddleware(http.HandlerFunc(h.HandleGetBounties)))
-	mux.Handle("POST /bounties", h.applyMiddleware(http.HandlerFunc(h.HandleCreateBounty)))
-	mux.Handle("GET /bounties/", h.applyMiddleware(http.HandlerFunc(h.HandleGetBountyByID)))
-	mux.Handle("PUT /bounties/", h.applyMiddleware(http.HandlerFunc(h.HandleUpdateBounty)))
+func (handler *Handler) RegisterRoutes(mux *http.ServeMux) {
+	mux.Handle("GET /bounties", handler.applyMiddleware(http.HandlerFunc(handler.HandleGetBounties)))
+	mux.Handle("POST /bounties", handler.applyMiddleware(http.HandlerFunc(handler.HandleCreateBounty)))
+	mux.Handle("GET /bounties/", handler.applyMiddleware(http.HandlerFunc(handler.HandleGetBountyByID)))
+	mux.Handle("PUT /bounties/", handler.applyMiddleware(http.HandlerFunc(handler.HandleUpdateBounty)))
 }
 
-func (h *Handler) applyMiddleware(handler http.Handler) http.Handler {
-	for i := len(h.middlewares) - 1; i >= 0; i-- {
-		handler = h.middlewares[i](handler)
+func (handler *Handler) applyMiddleware(nextHandler http.Handler) http.Handler {
+	for i := len(handler.middlewares) - 1; i >= 0; i-- {
+		nextHandler = handler.middlewares[i](nextHandler)
 	}
-	return handler
+	return nextHandler
 }
 
-func (h *Handler) HandleGetBounties(w http.ResponseWriter, r *http.Request) {
-	bounties, err := h.service.GetBounties()
+func (handler *Handler) HandleGetBounties(writer http.ResponseWriter, request *http.Request) {
+	bounties, err := handler.service.GetBounties()
 	if err != nil {
-		http.Error(w, "Failed to get bounties", http.StatusInternalServerError)
+		http.Error(writer, "Failed to get bounties", http.StatusInternalServerError)
 		log.Printf("Error getting bounties: %v", err)
 		return
 	}
-	writeJSON(w, bounties, http.StatusOK)
+	writeJSON(writer, bounties, http.StatusOK)
 }
 
-func (h *Handler) HandleGetBountyByID(w http.ResponseWriter, r *http.Request) {
-	id := strings.TrimPrefix(r.URL.Path, "/bounties/")
-	if id == "" {
-		http.Error(w, "Bounty ID is required", http.StatusBadRequest)
+func (handler *Handler) HandleGetBountyByID(writer http.ResponseWriter, request *http.Request) {
+	bountyID := strings.TrimPrefix(request.URL.Path, "/bounties/")
+	if bountyID == "" {
+		http.Error(writer, "Bounty ID is required", http.StatusBadRequest)
 		return
 	}
-	bounty, err := h.service.GetBountiesBy(id)
+	bounty, err := handler.service.GetBountiesBy(bountyID)
 	if err != nil {
-		http.Error(w, "Failed to get bounty by ID", http.StatusInternalServerError)
+		http.Error(writer, "Failed to get bounty by ID", http.StatusInternalServerError)
 		log.Printf("Error getting bounty by ID: %v", err)
 		return
 	}
-	writeJSON(w, bounty, http.StatusOK)
+	writeJSON(writer, bounty, http.StatusOK)
 }
 
-func (h *Handler) HandleCreateBounty(w http.ResponseWriter, r *http.Request) {
-	var bounty Bounty
-	if err := json.NewDecoder(r.Body).Decode(&bounty); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+func (handler *Handler) HandleCreateBounty(writer http.ResponseWriter, request *http.Request) {
+	var newBounty Bounty
+	if err := json.NewDecoder(request.Body).Decode(&newBounty); err != nil {
+		http.Error(writer, "Invalid request body", http.StatusBadRequest)
 		log.Printf("Error decoding create bounty request: %v", err)
 		return
 	}
-	if err := h.service.CreateBounty(&bounty); err != nil {
-		http.Error(w, "Failed to create bounty", http.StatusInternalServerError)
+	if err := handler.service.CreateBounty(&newBounty); err != nil {
+		http.Error(writer, "Failed to create bounty", http.StatusInternalServerError)
 		log.Printf("Error creating bounty: %v", err)
 		return
 	}
-	writeJSON(w, bounty, http.StatusCreated)
+	writeJSON(writer, newBounty, http.StatusCreated)
 }
 
-func (h *Handler) HandleUpdateBounty(w http.ResponseWriter, r *http.Request) {
-	var bounty Bounty
-	if err := json.NewDecoder(r.Body).Decode(&bounty); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+func (handler *Handler) HandleUpdateBounty(writer http.ResponseWriter, request *http.Request) {
+	var updatedBounty Bounty
+	if err := json.NewDecoder(request.Body).Decode(&updatedBounty); err != nil {
+		http.Error(writer, "Invalid request body", http.StatusBadRequest)
 		log.Printf("Error decoding update bounty request: %v", err)
 		return
 	}
-	if err := h.service.UpdateBounty(&bounty); err != nil {
-		http.Error(w, "Failed to update bounty", http.StatusInternalServerError)
+	if err := handler.service.UpdateBounty(&updatedBounty); err != nil {
+		http.Error(writer, "Failed to update bounty", http.StatusInternalServerError)
 		log.Printf("Error updating bounty: %v", err)
 		return
 	}
-	writeJSON(w, bounty, http.StatusOK)
+	writeJSON(writer, updatedBounty, http.StatusOK)
 }
 
-func writeJSON(w http.ResponseWriter, data any, status int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(data); err != nil {
+func writeJSON(writer http.ResponseWriter, data any, statusCode int) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(statusCode)
+	if err := json.NewEncoder(writer).Encode(data); err != nil {
 		log.Printf("Failed to write JSON response: %v", err)
 	}
 }
