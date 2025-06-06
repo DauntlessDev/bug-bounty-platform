@@ -56,7 +56,7 @@ func (r *DBRepository) CreateBounty(b *Bounty) error {
 }
 
 func (r *DBRepository) UpdateBounty(b *Bounty) error {
-	params, err := toDBUpdateParams(*b)
+	params, err := ToDBUpdateParams(*b)
 	if err != nil {
 		return err
 	}
