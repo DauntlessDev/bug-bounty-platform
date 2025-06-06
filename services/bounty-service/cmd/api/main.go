@@ -7,6 +7,7 @@ import (
 
 	"database/sql"
 
+	"github.com/DauntlessDev/bug-bounty-platform/services/bounty-service/internal/server"
 	_ "github.com/lib/pq" // Import the PostgreSQL driver
 )
 
@@ -29,7 +30,7 @@ func main() {
 	}
 	fmt.Println("Successfully connected to the database!")
 
-	server := NewServer(dbConn)
+	server := server.NewServer(dbConn)
 
 	err = server.Start(":8080")
 	if err != nil {
