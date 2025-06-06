@@ -17,8 +17,8 @@ func NewRouter(bountyService *bounty.Service) *Router {
 }
 
 func (router *Router) SetupRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/bounties", router.bountyHandler.HandleGetBounties)
-	mux.HandleFunc("/bounties/", router.bountyHandler.HandleGetBountyByID) // For /bounties/{id}
-	mux.HandleFunc("/bounties/create", router.bountyHandler.HandleCreateBounty)
-	mux.HandleFunc("/bounties/update", router.bountyHandler.HandleUpdateBounty)
+	mux.HandleFunc("GET /bounties", router.bountyHandler.HandleGetBounties)
+	mux.HandleFunc("POST /bounties", router.bountyHandler.HandleCreateBounty)
+	mux.HandleFunc("GET /bounties/{id}", router.bountyHandler.HandleGetBountyByID)
+	mux.HandleFunc("PUT /bounties/{id}", router.bountyHandler.HandleUpdateBounty)
 }
