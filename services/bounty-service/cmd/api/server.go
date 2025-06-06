@@ -15,7 +15,7 @@ type Server struct {
 
 func NewServer(dbConn *sql.DB) *Server {
 	queries := db.New(dbConn)
-	bountyRepo := bounty.NewDBRepository(queries) // Use the new DBRepository
+	bountyRepo := bounty.NewDBRepository(queries)
 	bountyService := bounty.NewService(bountyRepo)
 	router := NewRouter(bountyService)
 

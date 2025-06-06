@@ -6,17 +6,14 @@ import (
 	"net/http"
 )
 
-// Handler struct holds the bounty service dependency.
 type Handler struct {
 	service *Service
 }
 
-// NewHandler creates a new Handler instance.
 func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
-// HandleGetBounties handles the request to get all bounties.
 func (h *Handler) HandleGetBounties(w http.ResponseWriter, r *http.Request) {
 	bounties, err := h.service.GetBounties()
 	if err != nil {
@@ -33,7 +30,6 @@ func (h *Handler) HandleGetBounties(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// HandleGetBountyByID handles the request to get a bounty by its ID.
 func (h *Handler) HandleGetBountyByID(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/bounties/"):]
 	if id == "" {
@@ -56,7 +52,6 @@ func (h *Handler) HandleGetBountyByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// HandleCreateBounty handles the request to create a new bounty.
 func (h *Handler) HandleCreateBounty(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -83,7 +78,6 @@ func (h *Handler) HandleCreateBounty(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// HandleUpdateBounty handles the request to update an existing bounty.
 func (h *Handler) HandleUpdateBounty(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
