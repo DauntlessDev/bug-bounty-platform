@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strings"
 )
 
 type Handler struct {
@@ -21,8 +20,8 @@ func NewHandler(service *Service, middlewares ...Middleware) *Handler {
 func (handler *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("GET /bounties", handler.applyMiddleware(http.HandlerFunc(handler.HandleGetBounties)))
 	mux.Handle("POST /bounties", handler.applyMiddleware(http.HandlerFunc(handler.HandleCreateBounty)))
-	mux.Handle("GET /bounties/", handler.applyMiddleware(http.HandlerFunc(handler.HandleGetBountyByID)))
-	mux.Handle("PUT /bounties/", handler.applyMiddleware(http.HandlerFunc(handler.HandleUpdateBounty)))
+	mux.Handle("GET /bounties/{id}", handler.applyMiddleware(http.HandlerFunc(handler.HandleGetBountyByID)))
+	mux.Handle("PATCH /bounties/{id}", handler.applyMiddleware(http.HandlerFunc(handler.HandleUpdateBounty)))
 }
 
 func (handler *Handler) applyMiddleware(nextHandler http.Handler) http.Handler {
@@ -33,7 +32,7 @@ func (handler *Handler) applyMiddleware(nextHandler http.Handler) http.Handler {
 }
 
 func (handler *Handler) HandleGetBounties(writer http.ResponseWriter, request *http.Request) {
-	bounties, err := handler.service.GetBounties()
+	bounties, err := handler.service.GetBounties(request.Context())
 	if err != nil {
 		http.Error(writer, "Failed to get bounties", http.StatusInternalServerError)
 		log.Printf("Error getting bounties: %v", err)
@@ -43,12 +42,12 @@ func (handler *Handler) HandleGetBounties(writer http.ResponseWriter, request *h
 }
 
 func (handler *Handler) HandleGetBountyByID(writer http.ResponseWriter, request *http.Request) {
-	bountyID := strings.TrimPrefix(request.URL.Path, "/bounties/")
+	bountyID := request.PathValue("id")
 	if bountyID == "" {
 		http.Error(writer, "Bounty ID is required", http.StatusBadRequest)
 		return
 	}
-	bounty, err := handler.service.GetBountiesBy(bountyID)
+	bounty, err := handler.service.GetBountiesBy(request.Context(), bountyID)
 	if err != nil {
 		http.Error(writer, "Failed to get bounty by ID", http.StatusInternalServerError)
 		log.Printf("Error getting bounty by ID: %v", err)
@@ -64,7 +63,7 @@ func (handler *Handler) HandleCreateBounty(writer http.ResponseWriter, request *
 		log.Printf("Error decoding create bounty request: %v", err)
 		return
 	}
-	if err := handler.service.CreateBounty(&newBounty); err != nil {
+	if err := handler.service.CreateBounty(request.Context(), &newBounty); err != nil {
 		http.Error(writer, "Failed to create bounty", http.StatusInternalServerError)
 		log.Printf("Error creating bounty: %v", err)
 		return
@@ -73,13 +72,20 @@ func (handler *Handler) HandleCreateBounty(writer http.ResponseWriter, request *
 }
 
 func (handler *Handler) HandleUpdateBounty(writer http.ResponseWriter, request *http.Request) {
+	bountyID := request.PathValue("id")
+	if bountyID == "" {
+		http.Error(writer, "Bounty ID is required", http.StatusBadRequest)
+		return
+	}
+
 	var updatedBounty Bounty
 	if err := json.NewDecoder(request.Body).Decode(&updatedBounty); err != nil {
 		http.Error(writer, "Invalid request body", http.StatusBadRequest)
 		log.Printf("Error decoding update bounty request: %v", err)
 		return
 	}
-	if err := handler.service.UpdateBounty(&updatedBounty); err != nil {
+	updatedBounty.ID = bountyID // Ensure the ID from the path is used
+	if err := handler.service.UpdateBounty(request.Context(), &updatedBounty); err != nil {
 		http.Error(writer, "Failed to update bounty", http.StatusInternalServerError)
 		log.Printf("Error updating bounty: %v", err)
 		return

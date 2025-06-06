@@ -38,7 +38,7 @@ func toDBParams(bounty Bounty) (db.CreateBountyParams, error) {
 	}, nil
 }
 
-func ToDBUpdateParams(bounty Bounty) (db.UpdateBountyParams, error) {
+func toDBUpdateParams(bounty Bounty) (db.UpdateBountyParams, error) {
 	uuidID, err := uuid.Parse(bounty.ID)
 	if err != nil {
 		return db.UpdateBountyParams{}, err

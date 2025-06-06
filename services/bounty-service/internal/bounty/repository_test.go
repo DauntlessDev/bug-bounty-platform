@@ -1,10 +1,9 @@
-package bounty_test
+package bounty
 
 import (
 	"context"
 	"testing"
 
-	"github.com/DauntlessDev/bug-bounty-platform/services/bounty-service/internal/bounty"
 	"github.com/DauntlessDev/bug-bounty-platform/services/bounty-service/internal/db"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -40,8 +39,8 @@ func TestGetBounties_Success(test *testing.T) {
 	dbBounties := []db.Bounty{{ID: uuid.New(), Title: "Sample"}}
 	mockQueries.On("GetBounties", mock.Anything).Return(dbBounties, nil)
 
-	repository := bounty.NewDBRepository(mockQueries)
-	result, err := repository.GetBounties()
+	repository := NewDBRepository(mockQueries)
+	result, err := repository.GetBounties(context.Background())
 
 	assert.NoError(test, err)
 	assert.Len(test, result, 1)
@@ -50,8 +49,8 @@ func TestGetBounties_Success(test *testing.T) {
 }
 
 func TestGetBountyByID_InvalidUUID(test *testing.T) {
-	repository := bounty.NewDBRepository(nil)
-	_, err := repository.GetBountyByID("invalid-uuid")
+	repository := NewDBRepository(nil)
+	_, err := repository.GetBountyByID(context.Background(), "invalid-uuid")
 	assert.Error(test, err)
 }
 
@@ -61,8 +60,8 @@ func TestGetBountyByID_Success(test *testing.T) {
 	dbItem := db.Bounty{ID: bountyID, Title: "Test"}
 	mockQueries.On("GetBountyByID", mock.Anything, bountyID).Return(dbItem, nil)
 
-	repository := bounty.NewDBRepository(mockQueries)
-	result, err := repository.GetBountyByID(bountyID.String())
+	repository := NewDBRepository(mockQueries)
+	result, err := repository.GetBountyByID(context.Background(), bountyID.String())
 
 	assert.NoError(test, err)
 	assert.Equal(test, "Test", result.Title)
@@ -70,20 +69,20 @@ func TestGetBountyByID_Success(test *testing.T) {
 }
 
 func TestCreateBounty_ErrorFromToDBParams(test *testing.T) {
-	repository := bounty.NewDBRepository(nil)
-	bountyItem := &bounty.Bounty{}
+	repository := NewDBRepository(nil)
+	bountyItem := &Bounty{}
 	// TODO: This will fail if toDBParams returns an error on invalid input
-	assert.Error(test, repository.CreateBounty(bountyItem))
+	assert.Error(test, repository.CreateBounty(context.Background(), bountyItem))
 }
 
 func TestUpdateBounty_Success(test *testing.T) {
 	mockQueries := new(MockQueries)
-	bountyItem := &bounty.Bounty{ID: uuid.New().String(), Title: "Updated"}
-	params, _ := bounty.ToDBUpdateParams(*bountyItem)
+	bountyItem := &Bounty{ID: uuid.New().String(), Title: "Updated"}
+	params, _ := toDBUpdateParams(*bountyItem)
 	mockQueries.On("UpdateBounty", mock.Anything, params).Return(nil)
 
-	repository := bounty.NewDBRepository(mockQueries)
-	err := repository.UpdateBounty(bountyItem)
+	repository := NewDBRepository(mockQueries)
+	err := repository.UpdateBounty(context.Background(), bountyItem)
 	assert.NoError(test, err)
 	mockQueries.AssertExpectations(test)
 }

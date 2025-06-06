@@ -12,18 +12,18 @@ type DBRepository struct {
 }
 
 type DBQuerier interface {
-	GetBounties(context.Context) ([]db.Bounty, error)
-	GetBountyByID(context.Context, uuid.UUID) (db.Bounty, error)
-	CreateBounty(context.Context, db.CreateBountyParams) error
-	UpdateBounty(context.Context, db.UpdateBountyParams) error
+	GetBounties(ctx context.Context) ([]db.Bounty, error)
+	GetBountyByID(ctx context.Context, id uuid.UUID) (db.Bounty, error)
+	CreateBounty(ctx context.Context, arg db.CreateBountyParams) error
+	UpdateBounty(ctx context.Context, arg db.UpdateBountyParams) error
 }
 
 func NewDBRepository(queries DBQuerier) Repository {
 	return &DBRepository{dbQuerier: queries}
 }
 
-func (repository *DBRepository) GetBounties() ([]Bounty, error) {
-	databaseBounties, err := repository.dbQuerier.GetBounties(context.Background())
+func (repository *DBRepository) GetBounties(ctx context.Context) ([]Bounty, error) {
+	databaseBounties, err := repository.dbQuerier.GetBounties(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -35,30 +35,30 @@ func (repository *DBRepository) GetBounties() ([]Bounty, error) {
 	return bounties, nil
 }
 
-func (repository *DBRepository) GetBountyByID(bountyID string) (Bounty, error) {
+func (repository *DBRepository) GetBountyByID(ctx context.Context, bountyID string) (Bounty, error) {
 	uuidID, err := uuid.Parse(bountyID)
 	if err != nil {
 		return Bounty{}, err
 	}
-	databaseBounty, err := repository.dbQuerier.GetBountyByID(context.Background(), uuidID)
+	databaseBounty, err := repository.dbQuerier.GetBountyByID(ctx, uuidID)
 	if err != nil {
 		return Bounty{}, err
 	}
 	return toDomain(databaseBounty), nil
 }
 
-func (repository *DBRepository) CreateBounty(bounty *Bounty) error {
+func (repository *DBRepository) CreateBounty(ctx context.Context, bounty *Bounty) error {
 	params, err := toDBParams(*bounty)
 	if err != nil {
 		return err
 	}
-	return repository.dbQuerier.CreateBounty(context.Background(), params)
+	return repository.dbQuerier.CreateBounty(ctx, params)
 }
 
-func (repository *DBRepository) UpdateBounty(bounty *Bounty) error {
-	params, err := ToDBUpdateParams(*bounty)
+func (repository *DBRepository) UpdateBounty(ctx context.Context, bounty *Bounty) error {
+	params, err := toDBUpdateParams(*bounty)
 	if err != nil {
 		return err
 	}
-	return repository.dbQuerier.UpdateBounty(context.Background(), params)
+	return repository.dbQuerier.UpdateBounty(ctx, params)
 }
