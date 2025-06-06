@@ -1,6 +1,10 @@
 package bounty
 
-import "context"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type Repository interface {
 	GetBounties(ctx context.Context) ([]Bounty, error)
@@ -26,6 +30,7 @@ func (s *Service) GetBountiesBy(ctx context.Context, bountyID string) (Bounty, e
 }
 
 func (s *Service) CreateBounty(ctx context.Context, bounty *Bounty) error {
+	bounty.ID = uuid.New().String()
 	return s.repository.CreateBounty(ctx, bounty)
 }
 
