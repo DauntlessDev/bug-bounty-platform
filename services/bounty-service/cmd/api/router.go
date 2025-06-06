@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/DauntlessDev/bug-bounty-platform/services/bounty-service/internal/bounty"
+	"github.com/DauntlessDev/bug-bounty-platform/services/bounty-service/pkg/middleware"
 )
 
 type Router struct {
@@ -11,14 +12,10 @@ type Router struct {
 }
 
 func NewRouter(bountyService *bounty.Service) *Router {
-	return &Router{
-		bountyHandler: bounty.NewHandler(bountyService),
-	}
+	bountyHandler := bounty.NewHandler(bountyService, middleware.LoggingMiddleware)
+	return &Router{bountyHandler: bountyHandler}
 }
 
 func (router *Router) SetupRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /bounties", router.bountyHandler.HandleGetBounties)
-	mux.HandleFunc("POST /bounties", router.bountyHandler.HandleCreateBounty)
-	mux.HandleFunc("GET /bounties/{id}", router.bountyHandler.HandleGetBountyByID)
-	mux.HandleFunc("PUT /bounties/{id}", router.bountyHandler.HandleUpdateBounty)
+	router.bountyHandler.RegisterRoutes(mux)
 }
