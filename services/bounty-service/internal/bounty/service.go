@@ -8,25 +8,25 @@ type Repository interface {
 }
 
 type Service struct {
-	repository Repository
+	repo Repository
 }
 
-func NewService(repository Repository) *Service {
-	return &Service{repository: repository}
+func NewService(repo Repository) *Service {
+	return &Service{repo: repo}
 }
 
 func (s *Service) GetBounties() ([]Bounty, error) {
-	return s.repository.GetBounties()
+	return s.repo.GetBounties()
 }
 
 func (s *Service) GetBountiesBy(id string) (Bounty, error) {
-	return s.repository.GetBountyByID(id)
+	return s.repo.GetBountyByID(id)
 }
 
 func (s *Service) CreateBounty(bounty *Bounty) error {
-	return s.repository.CreateBounty(bounty)
+	return s.repo.CreateBounty(bounty)
 }
 
 func (s *Service) UpdateBounty(bounty *Bounty) error {
-	return s.repository.UpdateBounty(bounty)
+	return s.repo.UpdateBounty(bounty)
 }
