@@ -1,24 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
 
 	"database/sql"
 
+	"github.com/DauntlessDev/bug-bounty-platform/services/bounty-service/internal/config"
 	"github.com/DauntlessDev/bug-bounty-platform/services/bounty-service/internal/server"
 	_ "github.com/lib/pq" // Import the PostgreSQL driver
 )
 
 func main() {
-	dataSourceName := os.Getenv("DATABASE_URL")
-	if dataSourceName == "" {
-		dataSourceName = "host=localhost port=5432 user=postgres password=postgres dbname=bounty_service sslmode=disable"
-		log.Println("DATABASE_URL not set, using default connection string.")
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	dbConn, err := sql.Open("postgres", dataSourceName)
+	dbConn, err := sql.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -28,11 +26,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to ping database: %v", err)
 	}
-	fmt.Println("Successfully connected to the database!")
+	log.Println("Successfully connected to the database!")
 
-	server := server.NewServer(dbConn)
+	s := server.NewServer(dbConn)
 
-	err = server.Start(":8080")
+	err = s.Start(":" + cfg.ServerPort)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
