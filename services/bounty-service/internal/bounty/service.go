@@ -17,18 +17,18 @@ func NewService(repo Repository) *Service {
 	return &Service{repository: repo}
 }
 
-func (service *Service) GetBounties(ctx context.Context) ([]Bounty, error) {
-	return service.repository.GetBounties(ctx)
+func (s *Service) GetBounties(ctx context.Context) ([]Bounty, error) {
+	return s.repository.GetBounties(ctx)
 }
 
-func (service *Service) GetBountiesBy(ctx context.Context, bountyID string) (Bounty, error) {
-	return service.repository.GetBountyByID(ctx, bountyID)
+func (s *Service) GetBountiesBy(ctx context.Context, bountyID string) (Bounty, error) {
+	return s.repository.GetBountyByID(ctx, bountyID)
 }
 
-func (service *Service) CreateBounty(ctx context.Context, bounty *Bounty) error {
-	return service.repository.CreateBounty(ctx, bounty)
+func (s *Service) CreateBounty(ctx context.Context, bounty *Bounty) error {
+	return s.repository.CreateBounty(ctx, bounty)
 }
 
-func (service *Service) UpdateBounty(ctx context.Context, bounty *Bounty) error {
-	return service.repository.UpdateBounty(ctx, bounty)
+func (s *Service) UpdateBounty(ctx context.Context, bounty *Bounty) error {
+	return s.repository.UpdateBounty(ctx, bounty)
 }

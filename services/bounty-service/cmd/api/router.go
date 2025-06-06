@@ -16,6 +16,6 @@ func NewRouter(bountyService *bounty.Service) *Router {
 	return &Router{bountyHandler: bountyHandler}
 }
 
-func (router *Router) SetupRoutes(mux *http.ServeMux) {
-	router.bountyHandler.RegisterRoutes(mux)
+func (r *Router) SetupRoutes(mux *http.ServeMux) {
+	r.bountyHandler.RegisterRoutes(mux)
 }

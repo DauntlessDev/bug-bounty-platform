@@ -24,9 +24,9 @@ func NewServer(dbConn *sql.DB) *Server {
 	}
 }
 
-func (server *Server) Start(address string) error {
+func (s *Server) Start(address string) error {
 	mux := http.NewServeMux()
-	server.router.SetupRoutes(mux)
+	s.router.SetupRoutes(mux)
 
 	log.Printf("Starting server on %s", address)
 	return http.ListenAndServe(address, mux)
