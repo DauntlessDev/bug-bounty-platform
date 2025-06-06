@@ -8,7 +8,7 @@ import (
 )
 
 type DBRepository struct {
-	q DBQuerier
+	dbQuerier DBQuerier
 }
 
 type DBQuerier interface {
@@ -19,11 +19,11 @@ type DBQuerier interface {
 }
 
 func NewDBRepository(queries DBQuerier) Repository {
-	return &DBRepository{q: queries}
+	return &DBRepository{dbQuerier: queries}
 }
 
 func (repository *DBRepository) GetBounties() ([]Bounty, error) {
-	databaseBounties, err := repository.q.GetBounties(context.Background())
+	databaseBounties, err := repository.dbQuerier.GetBounties(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (repository *DBRepository) GetBountyByID(bountyID string) (Bounty, error) {
 	if err != nil {
 		return Bounty{}, err
 	}
-	databaseBounty, err := repository.q.GetBountyByID(context.Background(), uuidID)
+	databaseBounty, err := repository.dbQuerier.GetBountyByID(context.Background(), uuidID)
 	if err != nil {
 		return Bounty{}, err
 	}
@@ -52,7 +52,7 @@ func (repository *DBRepository) CreateBounty(bounty *Bounty) error {
 	if err != nil {
 		return err
 	}
-	return repository.q.CreateBounty(context.Background(), params)
+	return repository.dbQuerier.CreateBounty(context.Background(), params)
 }
 
 func (repository *DBRepository) UpdateBounty(bounty *Bounty) error {
@@ -60,5 +60,5 @@ func (repository *DBRepository) UpdateBounty(bounty *Bounty) error {
 	if err != nil {
 		return err
 	}
-	return repository.q.UpdateBounty(context.Background(), params)
+	return repository.dbQuerier.UpdateBounty(context.Background(), params)
 }
