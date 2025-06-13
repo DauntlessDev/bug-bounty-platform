@@ -1,6 +1,5 @@
 name: Go Unit Tests
 
-# Trigger the workflow on push and pull requests
 on:
   push:
     branches: [ main ]
@@ -12,48 +11,36 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v4
-    
-    # Step 2: Setup Go environment
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.24.3'  # Specify your Go version
-    
-    # Step 3: Cache Go modules for faster builds
+        go-version: '1.24.3'
+
     - name: Cache Go modules
       uses: actions/cache@v3
       with:
         path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('services/bounty-service/go.sum', 'services/bounty-service/go.mod') }}
+        key: ${{ runner.os }}-go-${{ hashFiles('services/bounty-service/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
-    
-    # Step 4: Download dependencies
+
     - name: Download dependencies
+      working-directory: services/bounty-service
       run: go mod download
-    
-    # Step 5: Run tests
+
     - name: Run tests
-      run: |
-        #!/bin/bash
-        for dir in ./services/*; do
-          echo "Running tests in $dir"
-          go test -v $dir/...
-        done
-    
-    # Step 6: Run tests with coverage
+      working-directory: services/bounty-service
+      run: go test -v ./...
+
     - name: Run tests with coverage
+      working-directory: services/bounty-service
       run: |
-        #!/bin/bash
-        for dir in ./services/*; do
-          echo "Running tests with coverage in $dir"
-          go test -v -coverprofile=coverage.out $dir/...
-        done
-    
-    # Step 7: Upload coverage to Codecov (optional)
+        go test -v -coverprofile=coverage.out ./...
+        mv coverage.out ${{ github.workspace }}/coverage.out
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
@@ -76,4 +63,5 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
+          working-directory: services/bounty-service
           args: --timeout=5m
