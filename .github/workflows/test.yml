@@ -5,51 +5,47 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.24.3'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.3'
 
-    - name: Cache Go modules
-      uses: actions/cache@v3
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('services/bounty-service/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('services/bounty-service/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - name: Download dependencies
-      run: |
-        cd services/bounty-service
-        go mod download
+      - name: Download dependencies
+        working-directory: services/bounty-service
+        run: go mod download
 
-    - name: Run tests
-      run: |
-        cd services/bounty-service
-        go test -v ./...
+      - name: Run tests
+        working-directory: services/bounty-service
+        run: go test -v ./...
 
-    - name: Run tests with coverage
-      run: |
-        cd services/bounty-service
-        go test -v -coverprofile=coverage.out ./...
-        mv coverage.out ${{ github.workspace }}/coverage.out
+      - name: Run tests with coverage
+        working-directory: services/bounty-service
+        run: |
+          go test -v -coverprofile=coverage.out ./...
+          mv coverage.out ${{ github.workspace }}/coverage.out
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.out
-        flags: unittests
-        name: codecov-umbrella
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.out
+          flags: unittests
+          name: codecov-umbrella
 
   lint:
     runs-on: ubuntu-latest
@@ -66,4 +62,5 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --timeout=5m --path-prefix=services/bounty-service
+          working-directory: services/bounty-service
+          args: --timeout=5m --out-format=colored-line-number
