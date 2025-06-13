@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/bounty-service
 
     steps:
       - name: Checkout code
@@ -17,35 +20,22 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24.3'
-
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        continue-on-error: true
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('services/bounty-service/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          go-version: '1.21.x'
+          cache-dependency-path: services/bounty-service/go.sum
 
       - name: Download dependencies
-        working-directory: services/bounty-service
         run: go mod download
 
       - name: Run tests
-        working-directory: services/bounty-service
         run: go test -v ./...
 
       - name: Run tests with coverage
-        working-directory: services/bounty-service
         run: |
           go test -v -coverprofile=coverage.out ./...
           mv coverage.out ${{ github.workspace }}/coverage.out
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage.out
           flags: unittests
@@ -53,6 +43,9 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/bounty-service
 
     steps:
       - name: Checkout code
@@ -61,21 +54,14 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24.3'
+          go-version: '1.21.x'
+          cache-dependency-path: services/bounty-service/go.sum
 
-      - name: Cache Go build
-        uses: actions/cache@v3
-        continue-on-error: true
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('services/bounty-service/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+      - name: Download dependencies
+        run: go mod download
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
           version: latest
           working-directory: services/bounty-service
