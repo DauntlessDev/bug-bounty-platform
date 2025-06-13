@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
 
 jobs:
   test:
@@ -20,10 +21,11 @@ jobs:
         go-version: '1.24.3'
 
     - name: Cache Go modules
+      working-directory: services/bounty-service
       uses: actions/cache@v3
       with:
         path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('services/bounty-service/go.sum') }}
+        key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
 
